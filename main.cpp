@@ -178,8 +178,8 @@ void print_stream(istream& stream, const Options& args) {
                         if (c == '\r') {
                                 if (args.show_ends) {
                                         cout << "^M";
+                                        continue;
                                 }
-                                continue;
                         }
                         if ((c == '\t') && args.show_tabs) {
                                 cout << "^I";
