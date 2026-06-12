@@ -131,8 +131,8 @@ Options parse_arguments(span<char*> line) {
 
                 // if combined options
                 if (word.starts_with("-") && !word.starts_with("--") && word.size() > 2) {
-                        for (size_t i = 1; i < word.size(); i++) {
-                                char c = word[i];
+                        for (size_t j = 1; j < word.size(); j++) {
+                                char c = word[j];
 
                                 if (c == '-') {
                                         cerr << args.program_name->string()
