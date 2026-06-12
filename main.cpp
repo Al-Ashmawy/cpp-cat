@@ -20,6 +20,7 @@ struct Options {
         bool show_tabs {false};
         bool squeeze_blank {false};
         bool show_nonprinting {false};
+        bool end_option_list {false};
 };
 
 Options parse_arguments(span<char*> line) {
@@ -32,7 +33,13 @@ Options parse_arguments(span<char*> line) {
         for (size_t i = 1; i < line.size(); i++) {
                 string_view word = line[i];
 
-                if (word == "-n" || word == "--number") {
+                if (args.end_option_list) {
+                        args.files.push_back(word);
+                }
+                else if (word == "--") {
+                        args.end_option_list = true;
+                }
+                else if (word == "-n" || word == "--number") {
                         args.number = true;
                 }
                 else if (word == "-b" || word == "--number-nonblank") {
