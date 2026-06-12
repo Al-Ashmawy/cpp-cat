@@ -185,29 +185,17 @@ void print_stream(istream& stream, const Options& args) {
                                 continue;
                         }
                         if (args.show_nonprinting) {
+                                if (c & 128) {
+                                        cout << "M-";
+                                        c = c & 127;
+                                }
                                 if (c < 32) {
-                                        unsigned char printable = c + 64;
-                                        cout << "^" << printable;
+                                        c = c | 64;
+                                        cout << "^" << c;
                                         continue;
                                 }
                                 else if (c == 127) { // DEL
                                         cout << "^?";
-                                        continue;
-                                }
-                                else if (c > 127) {
-                                        unsigned char printable = c - 128;
-                                        cout << "M-"; // 8th bit is set
-
-                                        if (printable < 32) {
-                                                unsigned char new_printable = printable + 64;
-                                                cout << "^" << new_printable;
-                                        }
-                                        else if (printable == 127) {
-                                                cout << "^?";
-                                        }
-                                        else {
-                                                cout << printable;
-                                        }
                                         continue;
                                 }
                         }
