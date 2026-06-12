@@ -15,7 +15,6 @@ struct Options {
         optional<fs::path> program_name {};
         bool number {false};
         bool number_nonblank {false};
-        bool from_stdin {false};
         bool show_ends {false};
         bool show_tabs {false};
         bool squeeze_blank {false};
@@ -101,9 +100,6 @@ void parse_option(string_view option, Options& args) {
                 // useless flag
                 // for POSIX compatibility.
         }
-        else if (option == "-") {
-                args.from_stdin = true;
-        }
         else {
                 if (option.starts_with("--")) {
                         cerr << args.program_name->string() << ": "
@@ -112,7 +108,7 @@ void parse_option(string_view option, Options& args) {
 
                         exit(EXIT_FAILURE);
                 }
-                else if (option.starts_with("-")) {
+                else if (option != "-" && option.starts_with("-")) {
                         cerr << args.program_name->string() << ": "
                                 << "invalid option -- "
                                 << "'" << option[1] << "'" << endl;
@@ -221,20 +217,21 @@ void main_program(const Options& args) {
 
         for (auto file_path : args.files) {
 
+                if (file_path == "-") {
+                        print_stream(cin, args);
+                        continue;
+                }
+
                 ifstream file(file_path);
                 int error = errno;
                 if (!file.is_open()) {
-                        cout << args.program_name.value().string() << ": ";
-                        cout << file_path.string() << ": ";
-                        cout << strerror(error) << endl;
+                        cerr << args.program_name.value().string() << ": ";
+                        cerr << file_path.string() << ": ";
+                        cerr << strerror(error) << endl;
                         continue;
                 }
 
                 print_stream(file, args);
-        }
-
-        if (args.from_stdin || args.files.size() == 0) {
-                print_stream(cin, args);
         }
 }
 
