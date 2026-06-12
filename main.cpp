@@ -52,6 +52,77 @@ void print_help(const Options& args) {
         exit(EXIT_SUCCESS);
 }
 
+void parse_option(string_view option, Options& args) {
+
+        if (args.end_option_list) {
+                args.files.push_back(option);
+        }
+        else if (option == "--") {
+                args.end_option_list = true;
+        }
+        else if (option == "--help") {
+                print_help(args);
+        }
+        else if (option == "--version") {
+                print_version(args);
+        }
+        else if (option == "-n" || option == "--number") {
+                args.number = true;
+        }
+        else if (option == "-b" || option == "--number-nonblank") {
+                args.number_nonblank = true;
+        }
+        else if (option == "-E" || option == "--show-ends") {
+                args.show_ends = true;
+        }
+        else if (option == "-T" || option == "--show-tabs") {
+                args.show_tabs = true;
+        }
+        else if (option == "-s" || option == "--squeeze-blank") {
+                args.squeeze_blank = true;
+        }
+        else if (option == "-v" || option == "--show-nonprinting") {
+                args.show_nonprinting = true;
+        }
+        else if (option == "-e") {
+                args.show_nonprinting = true;
+                args.show_ends = true;
+        }
+        else if (option == "-t") {
+                args.show_nonprinting = true;
+                args.show_tabs = true;
+        }
+        else if (option == "-A" || option == "--show-all") {
+                args.show_nonprinting = true;
+                args.show_ends = true;
+                args.show_tabs = true;
+        }
+        else if (option == "-u") {
+                // useless flag
+                // for POSIX compatibility.
+        }
+        else if (option == "-") {
+                args.from_stdin = true;
+        }
+        else {
+                if (option.starts_with("--")) {
+                        cerr << args.program_name->string() << ": "
+                                << "unrecognized option "
+                                << "'" << option << "'" << endl;
+
+                        exit(EXIT_FAILURE);
+                }
+                else if (option.starts_with("-")) {
+                        cerr << args.program_name->string() << ": "
+                                << "invalid option -- "
+                                << "'" << option[1] << "'" << endl;
+                        exit(EXIT_FAILURE);
+                }
+
+                args.files.push_back(option);
+        }
+}
+
 Options parse_arguments(span<char*> line) {
         Options args {};
 
@@ -62,66 +133,24 @@ Options parse_arguments(span<char*> line) {
         for (size_t i = 1; i < line.size(); i++) {
                 string_view word = line[i];
 
-                if (args.end_option_list) {
-                        args.files.push_back(word);
-                }
-                else if (word == "--") {
-                        args.end_option_list = true;
-                }
-                else if (word == "--help") {
-                        print_help(args);
-                }
-                else if (word == "--version") {
-                        print_version(args);
-                }
-                else if (word == "-n" || word == "--number") {
-                        args.number = true;
-                }
-                else if (word == "-b" || word == "--number-nonblank") {
-                        args.number_nonblank = true;
-                }
-                else if (word == "-E" || word == "--show-ends") {
-                        args.show_ends = true;
-                }
-                else if (word == "-T" || word == "--show-tabs") {
-                        args.show_tabs = true;
-                }
-                else if (word == "-s" || word == "--squeeze-blank") {
-                        args.squeeze_blank = true;
-                }
-                else if (word == "-v" || word == "--show-nonprinting") {
-                        args.show_nonprinting = true;
-                }
-                else if (word == "-e") {
-                        args.show_nonprinting = true;
-                        args.show_ends = true;
-                }
-                else if (word == "-t") {
-                        args.show_nonprinting = true;
-                        args.show_tabs = true;
-                }
-                else if (word == "-A" || word == "--show-all") {
-                        args.show_nonprinting = true;
-                        args.show_ends = true;
-                        args.show_tabs = true;
-                }
-                else if (word == "-u") {
-                        // useless flag
-                        // for POSIX compatibility.
-                }
-                else if (word == "-") {
-                        args.from_stdin = true;
+                // if combined options
+                if (word.starts_with("-") && !word.starts_with("--") && word.size() > 2) {
+                        for (size_t i = 1; i < word.size(); i++) {
+                                char c = word[i];
+
+                                if (c == '-') {
+                                        cerr << args.program_name->string()
+                                                << ": " << "invalid option "
+                                                << "-- '-'" << endl;
+                                        exit(EXIT_FAILURE);
+                                }
+
+                                string option = string("-") + c;
+                                parse_option(option, args);
+                        }
                 }
                 else {
-                        if (word.starts_with("--")) {
-                                cerr << args.program_name->string() << ": "
-                                        << "unrecognized option "
-                                        << "'" << word << "'" << endl;
-
-                                exit(EXIT_FAILURE);
-                        }
-
-                        args.files.push_back(word);
+                        parse_option(word, args);
                 }
         }
 
