@@ -154,6 +154,10 @@ Options parse_arguments(span<char*> line) {
                 args.number = false;
         }
 
+        if (args.files.empty()) {
+                args.files.push_back("-");
+        }
+
         return args;
 }
 
