@@ -149,7 +149,7 @@ void print_stream(istream& stream, const Options& args) {
                         line_number++;
                 }
 
-                for (char c : line) {
+                for (unsigned char c : line) {
                         if (c == '\r') {
                                 if (args.show_ends) {
                                         cout << "^M";
@@ -161,7 +161,16 @@ void print_stream(istream& stream, const Options& args) {
                                 continue;
                         }
                         if (args.show_nonprinting) {
-                                // ....
+                                if (c < 32) {
+                                        char printable = c + 64;
+                                        cout << "^" << printable;
+                                        continue;
+                                }
+                                else if (c > 127) {
+                                        char printable = c - 128 + 64;
+                                        cout << "M-^" << printable;
+                                        continue;
+                                }
                         }
 
                         cout << c;
