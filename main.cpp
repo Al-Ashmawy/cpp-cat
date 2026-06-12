@@ -23,6 +23,35 @@ struct Options {
         bool end_option_list {false};
 };
 
+void print_version(const Options& args) {
+        cout << args.program_name->string() << " 1.0" << endl;
+        exit(EXIT_SUCCESS);
+}
+
+void print_help(const Options& args) {
+        cout <<
+                "Usage: " << args.program_name->string() << " [OPTION]... [FILE]...\n"
+                "Concatenate FILE(s) to standard output.\n"
+                "\n"
+                "With no FILE, or when FILE is -, read standard input.\n"
+                "-A, --show-all           equivalent to -v -E -T\n"
+                "-b, --number-nonblank    number nonempty output lines, overrides -n\n"
+                "-e                       equivalent to -v -E\n"
+                "-E, --show-ends          display $ or ^M$ at end of each line\n"
+                "-n, --number             number all output lines\n"
+                "-s, --squeeze-blank      suppress repeated empty output lines\n"
+                "-t                       equivalent to -v -T\n"
+                "-T, --show-tabs          display TAB characters as ^I\n"
+                "-u                       (ignored)\n"
+                "-v, --show-nonprinting   use ^ and M- notation, except for LFD and TAB\n"
+                "--help\n"
+                "        display this help and exit\n"
+                "--version\n"
+                "        output version information and exit\n"
+                << endl;
+        exit(EXIT_SUCCESS);
+}
+
 Options parse_arguments(span<char*> line) {
         Options args {};
 
@@ -38,6 +67,12 @@ Options parse_arguments(span<char*> line) {
                 }
                 else if (word == "--") {
                         args.end_option_list = true;
+                }
+                else if (word == "--help") {
+                        print_help(args);
+                }
+                else if (word == "--version") {
+                        print_version(args);
                 }
                 else if (word == "-n" || word == "--number") {
                         args.number = true;
