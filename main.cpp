@@ -175,25 +175,39 @@ void print_stream(istream& stream, const Options& args) {
                 }
 
                 for (unsigned char c : line) {
-                        if (c == '\r') {
-                                if (args.show_ends) {
-                                        cout << "^M";
-                                        continue;
+                        if (c == '\t') {
+                                if (args.show_tabs) {
+                                        cout << "^I";
                                 }
-                        }
-                        if ((c == '\t') && args.show_tabs) {
-                                cout << "^I";
+                                else {
+                                        cout << '\t';
+                                }
                                 continue;
                         }
                         if (args.show_nonprinting) {
                                 if (c < 32) {
-                                        char printable = c + 64;
+                                        unsigned char printable = c + 64;
                                         cout << "^" << printable;
                                         continue;
                                 }
+                                else if (c == 127) { // DEL
+                                        cout << "^?";
+                                        continue;
+                                }
                                 else if (c > 127) {
-                                        char printable = c - 128 + 64;
-                                        cout << "M-^" << printable;
+                                        unsigned char printable = c - 128;
+                                        cout << "M-"; // 8th bit is set
+
+                                        if (printable < 32) {
+                                                unsigned char new_printable = printable + 64;
+                                                cout << "^" << new_printable;
+                                        }
+                                        else if (printable == 127) {
+                                                cout << "^?";
+                                        }
+                                        else {
+                                                cout << printable;
+                                        }
                                         continue;
                                 }
                         }
