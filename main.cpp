@@ -164,7 +164,7 @@ void print_stream(istream& stream, const Options& args) {
                 }
 
                 if (args.number || (args.number_nonblank && !is_blank) ) {
-                        println("    {}\t", line_number);
+                        print("    {}\t", line_number);
                         line_number++;
                 }
 
