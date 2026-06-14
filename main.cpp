@@ -6,6 +6,7 @@
 #include <vector>
 #include <span>
 #include <cstring>
+#include <print>
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -23,7 +24,7 @@ struct Options {
 };
 
 void print_version(const Options& args) {
-        cout << args.program_name->string() << " 1.0" << endl;
+        println("{} 1.0", args.program_name->string());
         exit(EXIT_SUCCESS);
 }
 
@@ -102,16 +103,11 @@ void parse_option(string_view option, Options& args) {
         }
         else {
                 if (option.starts_with("--")) {
-                        cerr << args.program_name->string() << ": "
-                                << "unrecognized option "
-                                << "'" << option << "'" << endl;
-
+                        println(cerr, "{}: unrecognized option '{}'", args.program_name->string(), option);
                         exit(EXIT_FAILURE);
                 }
                 else if (option != "-" && option.starts_with("-")) {
-                        cerr << args.program_name->string() << ": "
-                                << "invalid option -- "
-                                << "'" << option[1] << "'" << endl;
+                        println(cerr, "{}: invalid option -- '{}'", args.program_name->string(), option[1]);
                         exit(EXIT_FAILURE);
                 }
 
@@ -135,9 +131,7 @@ Options parse_arguments(span<char*> line) {
                                 char c = word[j];
 
                                 if (c == '-') {
-                                        cerr << args.program_name->string()
-                                                << ": " << "invalid option "
-                                                << "-- '-'" << endl;
+                                        println("{}: invalid option -- '-'", args.program_name->string());
                                         exit(EXIT_FAILURE);
                                 }
 
@@ -174,7 +168,7 @@ void print_stream(istream& stream, const Options& args) {
                 }
 
                 if (args.number || (args.number_nonblank && !is_blank) ) {
-                        cout << "    " << line_number << "\t";
+                        println("    {}\t", line_number);
                         line_number++;
                 }
 
@@ -231,9 +225,7 @@ void main_program(const Options& args) {
                 ifstream file(file_path);
                 int error = errno;
                 if (!file.is_open()) {
-                        cerr << args.program_name.value().string() << ": ";
-                        cerr << file_path.string() << ": ";
-                        cerr << strerror(error) << endl;
+                        println(cerr, "{}: {}: {}", args.program_name->string(), file_path.string(), strerror(error));
                         continue;
                 }
 
