@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
-#include <filesystem>
 #include <string_view>
 #include <vector>
 #include <span>
@@ -9,11 +8,10 @@
 #include <print>
 
 using namespace std;
-namespace fs = std::filesystem;
 
 struct Options {
-        vector<fs::path> files {};
-        optional<fs::path> program_name {};
+        vector<string> files {};
+        string program_name {};
         bool number {false};
         bool number_nonblank {false};
         bool show_ends {false};
@@ -24,13 +22,13 @@ struct Options {
 };
 
 void print_version(const Options& args) {
-        println("{} 1.0", args.program_name->string());
+        println("{} 1.0", args.program_name);
         exit(EXIT_SUCCESS);
 }
 
 void print_help(const Options& args) {
         cout <<
-                "Usage: " << args.program_name->string() << " [OPTION]... [FILE]...\n"
+                "Usage: " << args.program_name << " [OPTION]... [FILE]...\n"
                 "Concatenate FILE(s) to standard output.\n"
                 "\n"
                 "With no FILE, or when FILE is -, read standard input.\n"
@@ -55,7 +53,7 @@ void print_help(const Options& args) {
 void parse_option(string_view option, Options& args) {
 
         if (args.end_option_list) {
-                args.files.push_back(option);
+                args.files.push_back(string(option));
         }
         else if (option == "--") {
                 args.end_option_list = true;
@@ -103,24 +101,22 @@ void parse_option(string_view option, Options& args) {
         }
         else {
                 if (option.starts_with("--")) {
-                        println(cerr, "{}: unrecognized option '{}'", args.program_name->string(), option);
+                        println(cerr, "{}: unrecognized option '{}'", args.program_name, option);
                         exit(EXIT_FAILURE);
                 }
                 else if (option != "-" && option.starts_with("-")) {
-                        println(cerr, "{}: invalid option -- '{}'", args.program_name->string(), option[1]);
+                        println(cerr, "{}: invalid option -- '{}'", args.program_name, option[1]);
                         exit(EXIT_FAILURE);
                 }
 
-                args.files.push_back(option);
+                args.files.push_back(string(option));
         }
 }
 
 Options parse_arguments(span<char*> line) {
         Options args {};
 
-        if (line.size() > 0) {
-                args.program_name = line[0];
-        }
+        args.program_name = line[0];
 
         for (size_t i = 1; i < line.size(); i++) {
                 string_view word = line[i];
@@ -131,7 +127,7 @@ Options parse_arguments(span<char*> line) {
                                 char c = word[j];
 
                                 if (c == '-') {
-                                        println("{}: invalid option -- '-'", args.program_name->string());
+                                        println("{}: invalid option -- '-'", args.program_name);
                                         exit(EXIT_FAILURE);
                                 }
 
@@ -210,11 +206,6 @@ void print_stream(istream& stream, const Options& args) {
 }
 
 void main_program(const Options& args) {
-        if (!args.program_name.has_value()) {
-                cerr << "Program must have a name!\n" << endl;
-                exit(EXIT_FAILURE);
-        }
-
         for (auto file_path : args.files) {
 
                 if (file_path == "-") {
@@ -225,7 +216,7 @@ void main_program(const Options& args) {
                 ifstream file(file_path);
                 int error = errno;
                 if (!file.is_open()) {
-                        println(cerr, "{}: {}: {}", args.program_name->string(), file_path.string(), strerror(error));
+                        println(cerr, "{}: {}: {}", args.program_name, file_path, strerror(error));
                         continue;
                 }
 
@@ -234,9 +225,14 @@ void main_program(const Options& args) {
 }
 
 int main(int argc, char** argv) {
+        if (argc == 0) {
+                cerr << "Program must have a name!" << endl;
+                return EXIT_FAILURE;
+        }
+
         Options args = parse_arguments(span(argv, argc));
 
         main_program(args);
 
-        return 0;
+        return EXIT_SUCCESS;
 }
