@@ -1,24 +1,24 @@
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <iostream>
+#include <print>
+#include <span>
 #include <string_view>
 #include <vector>
-#include <span>
-#include <cstring>
-#include <print>
 
 using namespace std;
 
 struct Options {
-        vector<string> files {};
-        string program_name {};
-        bool number {false};
-        bool number_nonblank {false};
-        bool show_ends {false};
-        bool show_tabs {false};
-        bool squeeze_blank {false};
-        bool show_nonprinting {false};
-        bool end_option_list {false};
+        vector<string> files{};
+        string program_name{};
+        bool number{false};
+        bool number_nonblank{false};
+        bool show_ends{false};
+        bool show_tabs{false};
+        bool squeeze_blank{false};
+        bool show_nonprinting{false};
+        bool end_option_list{false};
 };
 
 void print_version(const Options& args) {
@@ -27,26 +27,29 @@ void print_version(const Options& args) {
 }
 
 void print_help(const Options& args) {
-        cout <<
-                "Usage: " << args.program_name << " [OPTION]... [FILE]...\n"
-                "Concatenate FILE(s) to standard output.\n"
-                "\n"
-                "With no FILE, or when FILE is -, read standard input.\n"
-                "-A, --show-all           equivalent to -v -E -T\n"
-                "-b, --number-nonblank    number nonempty output lines, overrides -n\n"
-                "-e                       equivalent to -v -E\n"
-                "-E, --show-ends          display $ or ^M$ at end of each line\n"
-                "-n, --number             number all output lines\n"
-                "-s, --squeeze-blank      suppress repeated empty output lines\n"
-                "-t                       equivalent to -v -T\n"
-                "-T, --show-tabs          display TAB characters as ^I\n"
-                "-u                       (ignored)\n"
-                "-v, --show-nonprinting   use ^ and M- notation, except for LFD and TAB\n"
-                "--help\n"
-                "        display this help and exit\n"
-                "--version\n"
-                "        output version information and exit\n"
-                << endl;
+        cout
+            << "Usage: " << args.program_name
+            << " [OPTION]... [FILE]...\n"
+               "Concatenate FILE(s) to standard output.\n"
+               "\n"
+               "With no FILE, or when FILE is -, read standard input.\n"
+               "-A, --show-all           equivalent to -v -E -T\n"
+               "-b, --number-nonblank    number nonempty output lines, "
+               "overrides -n\n"
+               "-e                       equivalent to -v -E\n"
+               "-E, --show-ends          display $ or ^M$ at end of each line\n"
+               "-n, --number             number all output lines\n"
+               "-s, --squeeze-blank      suppress repeated empty output lines\n"
+               "-t                       equivalent to -v -T\n"
+               "-T, --show-tabs          display TAB characters as ^I\n"
+               "-u                       (ignored)\n"
+               "-v, --show-nonprinting   use ^ and M- notation, except for LFD "
+               "and TAB\n"
+               "--help\n"
+               "        display this help and exit\n"
+               "--version\n"
+               "        output version information and exit\n"
+            << endl;
         exit(EXIT_SUCCESS);
 }
 
@@ -101,11 +104,17 @@ void parse_option(string_view option, Options& args) {
         }
         else {
                 if (option.starts_with("--")) {
-                        println(cerr, "{}: unrecognized option '{}'", args.program_name, option);
+                        println(cerr,
+                                "{}: unrecognized option '{}'",
+                                args.program_name,
+                                option);
                         exit(EXIT_FAILURE);
                 }
                 else if (option != "-" && option.starts_with("-")) {
-                        println(cerr, "{}: invalid option -- '{}'", args.program_name, option[1]);
+                        println(cerr,
+                                "{}: invalid option -- '{}'",
+                                args.program_name,
+                                option[1]);
                         exit(EXIT_FAILURE);
                 }
 
@@ -114,7 +123,7 @@ void parse_option(string_view option, Options& args) {
 }
 
 Options parse_arguments(span<char*> line) {
-        Options args {};
+        Options args{};
 
         args.program_name = line[0];
 
@@ -122,12 +131,14 @@ Options parse_arguments(span<char*> line) {
                 string_view word = line[i];
 
                 // if combined options
-                if (word.starts_with("-") && !word.starts_with("--") && word.size() > 2) {
+                if (word.starts_with("-") && !word.starts_with("--") &&
+                    word.size() > 2) {
                         for (size_t j = 1; j < word.size(); j++) {
                                 char c = word[j];
 
                                 if (c == '-') {
-                                        println("{}: invalid option -- '-'", args.program_name);
+                                        println("{}: invalid option -- '-'",
+                                                args.program_name);
                                         exit(EXIT_FAILURE);
                                 }
 
@@ -163,7 +174,7 @@ void print_stream(istream& stream, const Options& args) {
                         continue;
                 }
 
-                if (args.number || (args.number_nonblank && !is_blank) ) {
+                if (args.number || (args.number_nonblank && !is_blank)) {
                         print("    {}\t", line_number);
                         line_number++;
                 }
@@ -216,7 +227,11 @@ void main_program(const Options& args) {
                 ifstream file(file_path);
                 int error = errno;
                 if (!file.is_open()) {
-                        println(cerr, "{}: {}: {}", args.program_name, file_path, strerror(error));
+                        println(cerr,
+                                "{}: {}: {}",
+                                args.program_name,
+                                file_path,
+                                strerror(error));
                         continue;
                 }
 

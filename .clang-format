@@ -1,0 +1,28 @@
+---
+BasedOnStyle: LLVM
+
+# Indentation & Tabs
+UseTab: Never
+IndentWidth: 8
+AccessModifierOffset: -8
+
+PointerAlignment: Left
+
+ColumnLimit: 80
+
+# Force functions onto multiple lines
+AllowShortFunctionsOnASingleLine: None
+AllowShortBlocksOnASingleLine: Never
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+
+# Brace Wrapping
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterControlStatement: Never
+  BeforeElse: true
+  AfterFunction: false
+  BeforeCatch: true
+
+BinPackArguments: false
+BinPackParameters: false
